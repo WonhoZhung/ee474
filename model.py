@@ -369,3 +369,81 @@ class SegNet(nn.Module):
                 l2.weight.data = l1.weight.data
                 l2.bias.data = l1.bias.data
 
+
+
+class autoencoder(nn.Module):
+    def __init__(self, nchannels=3, width=172, height=600):
+        super(autoencoder, self).__init__()
+            # 3 224 128
+        self.encode1 = nn.Sequential(
+            nn.Conv2d(3, 64, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(64, 64, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2)
+        )
+            # 64 112 64
+        self.encode2 = nn.Sequential(
+            nn.Conv2d(64, 128, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(128, 128, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2)
+        )
+            # 128 56 32
+        self.encode3 = nn.Sequential(
+            nn.Conv2d(128, 256, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(256, 256, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(256, 256, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2)
+        )
+            # 256 28 16
+        self.encode4 = nn.Sequential(
+            nn.Conv2d(256, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2)
+        )
+            # 512 14 8
+        self.encode5 = nn.Sequential(
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.Conv2d(512, 512, 3, padding=1), nn.LeakyReLU(0.2),
+            nn.MaxPool2d(2, 2)
+        )
+        self.decode1 = nn.Sequential(
+            nn.ConvTranspose2d(512, 512, 3, padding=1, stride=2),
+            nn.LeakyReLU(0.2),
+            nn.BatchNorm2d(512)
+        )
+        self.decode2 = nn.Sequential(
+            nn.ConvTranspose2d(512, 256, 3, padding=1, stride=2),
+            nn.LeakyReLU(0.2),
+            nn.BatchNorm2d(512)
+        )
+        self.decode3 = nn.Sequential(
+            nn.ConvTranspose2d(256, 128, 3, padding=1, stride=2),
+            nn.LeakyReLU(0.2),
+            nn.BatchNorm2d(512)
+        )
+        self.decode4 = nn.Sequential(
+            nn.ConvTranspose2d(128, 64, 3, padding=1, stride=2),
+            nn.LeakyReLU(0.2),
+            nn.BatchNorm2d(512)
+        )
+        self.decode5 = nn.Sequential(
+            nn.ConvTranspose2d(64, 3, 3, padding=1, stride=2),
+            nn.LeakyReLU(0.2),
+            nn.BatchNorm2d(512),
+            nn.Sigmoid()
+        )
+
+    def forward(self, input):
+        encode1 = self.encoder1(input)
+        encode2 = self.encoder2(encode1)
+        encode3 = self.encoder3(encode2)
+        encode4 = self.encoder4(encode3 )
+        encode5 = self.encoder5(encode4)
+
+        decode1 = self.decoder1(encode5) + encode4
+        decode2 = self.decoder2(decode1) + encode3
+        decode3 = self.decoder3(decode2) + encode2
+        decode4 = self.decoder4(decode3) + encode1
+        decode5 = self.decoder5(decode4)
+        return decode5
