@@ -47,20 +47,44 @@ class dataset(Dataset):
         self.gt_paths = []
         self.text_paths = []
         path = root
-        for j in range(10085):
-            gt_tmp = path + '/gt_{}.jpg'.format(j)
-            self.gt_paths.append(gt_tmp)
-            text_tmp = path + '/text_{}.jpg'.format(j)
-            self.text_paths.append(text_tmp)
+        if train == True:
+            path = os.path.join(path, 'train')
+            for j in range(1000):
+                gt_tmp = path + '/masked/masked_ ({}).png'.format(j + 1)
+                self.gt_paths.append(gt_tmp)
+                text_tmp = path + '/text/text_ ({}).png'.format(j + 1)
+                self.text_paths.append(text_tmp)
 
-        ################################
+            ################################
 
-        assert isinstance(self.gt_paths, (list,)), 'Wrong type. self.paths should be list.'
-        assert isinstance(self.text_paths, (list,)), 'Wrong type. self.paths should be list.'
-        assert len(self.gt_paths) == 10085, 'There are 48,000 train images, but you have gathered %d image paths' % len(
-            self.gt_paths)
-        assert len(self.text_paths) == 10085, 'There are 12,000 test images, but you have gathered %d image paths' % len(
-            self.text_paths)
+            assert isinstance(self.gt_paths, (list,)), 'Wrong type. self.paths should be list.'
+            assert isinstance(self.text_paths, (list,)), 'Wrong type. self.paths should be list.'
+            assert len(
+                self.gt_paths) == 1000, 'There are 1000 train images, but you have gathered %d image paths' % len(
+                self.gt_paths)
+            assert len(
+                self.text_paths) == 1000, 'There are 1000 test images, but you have gathered %d image paths' % len(
+                self.text_paths)
+        else:
+            path = os.path.join(path, 'test')
+            for j in range(100):
+                gt_tmp = path + '/masked/masked_ ({}).png'.format(j + 1)
+                self.gt_paths.append(gt_tmp)
+                text_tmp = path + '/text/text_ ({}).png'.format(j + 1)
+                self.text_paths.append(text_tmp)
+
+            ################################
+
+            assert isinstance(self.gt_paths, (list,)), 'Wrong type. self.paths should be list.'
+            assert isinstance(self.text_paths, (list,)), 'Wrong type. self.paths should be list.'
+            assert len(
+                self.gt_paths) == 100, 'There are 1000 train images, but you have gathered %d image paths' % len(
+                self.gt_paths)
+            assert len(
+                self.text_paths) == 100, 'There are 1000 test images, but you have gathered %d image paths' % len(
+                self.text_paths)
+
+
 
     def __getitem__(self, idx):
         """
@@ -82,10 +106,10 @@ class dataset(Dataset):
         text = self.text_paths[idx]
 
         # P4.3. Convert it to torch.LongTensor with shape ().
-        gt = Image.open(gt)
+        gt = Image.open(gt).convert('RGB')
         if self.transform is not None:
             gt = self.transform(gt)
-        text = Image.open(text)
+        text = Image.open(text).convert('RGB')
         if self.transform is not None:
             text = self.transform(text)
 
