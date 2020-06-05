@@ -4,6 +4,8 @@ from PIL import Image
 #import numpy as np
 import math
 
+def read_image(image, lang='eng'):
+    return pytesseract.image_to_string(image, lang=lang)
 
 def merge_box(box1, box2):
     x1 = min(box1[0], box2[0])
@@ -12,12 +14,10 @@ def merge_box(box1, box2):
     y2 = max(box1[3], box2[3])
     return [x1, y1, x2, y2]
 
-
 def box_distance(box1, box2):
     retval = ((box1[0]+box1[2])/2 - (box2[0]+box2[2])/2)**2
     retval += ((box1[1]+box1[3])/2 - (box2[1]+box2[3])/2)**2
     return math.sqrt(retval)
-
 
 def clustering(boxes, threshold=100):
     clusters = []
@@ -35,9 +35,9 @@ def clustering(boxes, threshold=100):
         else: clusters.append(boxes[i])
     return clusters
 
-
 def area(w, h):
     return w*h
+
 
 img = cv2.imread('image.png', cv2.IMREAD_COLOR)
 
@@ -63,6 +63,12 @@ for i in range(n_boxes):
 clusters = clustering(boxes)
 
 alpha=10
+croppedImageList = []
+image = Image.open("gray.jpg")
 for cluster in clusters:
-    cv2.rectangle(gray, (cluster[0]-alpha, cluster[1]-alpha), (cluster[2]+alpha, cluster[3]+alpha), (0, 255, 0), 2)
-cv2.imwrite('gray_box.jpg', gray)
+    croppedImage = image.crop((cluster[0]-alpha, cluster[1]-alpha, cluster[2]+alpha, cluster[3]+alpha))
+    croppedImageList.append(croppedImage)
+
+for image in croppedImageList:
+    print(read_image(image).replace('\n', ' ').lower())
+    print('\n')
