@@ -8,6 +8,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from model import DnCNN
 from model import SegNet
+from model import autoencoder
 from torch.optim.lr_scheduler import MultiStepLR
 from utils import AverageMeter
 from dataset import get_dataloader
@@ -76,10 +77,14 @@ def train_dncnn(epoch_plus):
 
 
 def train_autoencoder(epoch_plus):
-    writer = SummaryWriter(log_dir='./runs_autoencoder')
-    num_epochs = 100
-    lr = 0.0001
+    writer = SummaryWriter(log_dir='./runs_autoencoder_3')
+    num_epochs = 500
+    lr = 0.001
+    bta1 = 0.9
+    bta2 = 0.999
+    weight_decay = 0.001
 
+    # model = autoencoder(nchannels=3, width=172, height=600)
     model = SegNet(3)
     if ngpu > 1:
         model = nn.DataParallel(model)
@@ -87,8 +92,10 @@ def train_autoencoder(epoch_plus):
         model = model.to(device, non_blocking=True)
     if epoch_plus > 0:
         model.load_state_dict(torch.load('./models/autoencoder_{}.pth'.format(epoch_plus)))
-    criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5)
+    criterion_bce = nn.BCELoss()
+    # criterion_dice = nn.
+    criterion = nn.MSELoss(reduction='sum')
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(bta1, bta2), weight_decay=weight_decay)
 
     for epoch in range(num_epochs):
         model.train()
@@ -103,7 +110,8 @@ def train_autoencoder(epoch_plus):
 
                 predicted = model(text)
 
-                loss = criterion(predicted, gt)
+                # loss = criterion_bce(predicted, gt) + criterion_dice(predicted, gt)
+                loss = criterion(predicted, gt - text) # predicts extracted text in white, all others in black
                 epoch_losses.update(loss.item(), len(gt))
                 optimizer.zero_grad()
                 loss.backward()
@@ -112,15 +120,22 @@ def train_autoencoder(epoch_plus):
                 _tqdm.set_postfix(loss='{:.6f}'.format(epoch_losses.avg))
                 _tqdm.update(len(gt))
 
-        save_path = './autoencoder_models'
+        save_path = './autoencoder_models_3'
         if not os.path.exists(save_path):
             os.mkdir(save_path)
+
+        gt_text = gt - text
+        predicted_mask = text + predicted
+
         torch.save(model.state_dict(),
                    os.path.join(save_path, 'autoencoder_{}.pth'.format(epoch + 1 + epoch_plus)))
         writer.add_scalar('Loss', epoch_losses.avg, epoch + 1 + epoch_plus)
-        writer.add_image('gt/gt_image_{}'.format(epoch + 1 + epoch_plus), gt[0].squeeze(), epoch + 1 + epoch_plus)
         writer.add_image('text/text_image_{}'.format(epoch + 1 + epoch_plus), text[0].squeeze(), epoch + 1 + epoch_plus)
-        writer.add_image('predicted/predicted_image_{}'.format(epoch + 1 + epoch_plus), predicted[0].squeeze(),
+        writer.add_image('gt/gt_image_{}'.format(epoch + 1 + epoch_plus), gt[0].squeeze(), epoch + 1 + epoch_plus)
+        writer.add_image('gt_text/gt_image_{}'.format(epoch + 1 + epoch_plus), gt_text[0].squeeze(), epoch + 1 + epoch_plus)
+        writer.add_image('predicted/predicted_image_{}'.format(epoch + 1 + epoch_plus), predicted_mask[0].squeeze(),
+                         epoch + 1 + epoch_plus)
+        writer.add_image('predicted_text/predicted_image_{}'.format(epoch + 1 + epoch_plus), predicted[0].squeeze(),
                          epoch + 1 + epoch_plus)
 
     writer.close()
