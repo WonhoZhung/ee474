@@ -1,4 +1,4 @@
-# ee474
+# EE474 Term Project
 
 ### Wooooz ↓
 
