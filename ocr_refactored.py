@@ -8,6 +8,11 @@ from googletrans import Translator
 trans = Translator()
 import requests
 
+"""
+COMMAND:
+python ocr_refactored.py {text_image_path} {masked_image_path}
+"""
+
 request_url = "https://openapi.naver.com/v1/papago/n2mt"
 
 def translate_papago(text, source='en', target='ko'):
