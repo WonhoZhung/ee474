@@ -20,9 +20,11 @@
                              .::::++:    ++=.:::
                             .*++++++:    +++++++*
                             
-dataset link: https://drive.google.com/file/d/1u0ZUYacBUeUMcRgqUhwHJIa-KGvbvH1N/view?usp=sharing
+dataset link: https://drive.google.com/file/d/1lHqWl2tyaK7m4G6eWnxtEyUYpn6yPXGa/view?usp=sharing
 
-test data results link: https://drive.google.com/file/d/1FtLwbg11YAWIFmkeKRJHMKNMMGPCWt9J/view?usp=sharing
+test results link: https://drive.google.com/file/d/1YpDVy2uco17zhx_9MhhDbn2BJTt39GHL/view?usp=sharing
+
+model and tensorboard results link: https://drive.google.com/file/d/17do0MAQ8KDVPNZxwvv_KiZutnCGuVLE-/view?usp=sharing
 
 
 
