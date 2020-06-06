@@ -55,6 +55,7 @@ img = cv2.imread('image.png', cv2.IMREAD_COLOR)
 
 #invert the image
 white_img = 255 - img
+white_img[white_img < 100] = 0
 
 #change into grayscale
 gray = cv2.cvtColor(white_img, cv2.COLOR_RGB2GRAY)
