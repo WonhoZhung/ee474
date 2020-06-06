@@ -115,7 +115,7 @@ for image in croppedImageList:
 
 masked_image = Image.open(sys.argv[2])
 
-fnt = "../font/NanumPen.ttf"
+fnt = "font/NanumPen.ttf"
 font = ImageFont.truetype(fnt, 12)
 draw = ImageDraw.Draw(masked_image)
 
