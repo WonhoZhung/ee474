@@ -24,7 +24,7 @@ transforms = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor()
 ])
 
-dataloader = get_dataloader(data_dir, transform=transforms, batch_size=batch_size)
+dataloader = get_dataloader(data_dir, train=True, transform=transforms, batch_size=batch_size)
 
 def train_dncnn(epoch_plus):
     writer = SummaryWriter(log_dir='./runs')

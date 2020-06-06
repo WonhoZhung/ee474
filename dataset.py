@@ -3,7 +3,7 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 
-os.chdir('/home/sgvr/wkim97/EE474/project')
+os.chdir('/home/sgvr/wkim97/EE474/ee474')
 
 class dataset(Dataset):
     """Customized `CIFAR10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
@@ -135,8 +135,8 @@ class dataset(Dataset):
 ########################################################################################################################
 # Problem 4-2. Implement Dataloader
 ########################################################################################################################
-def get_dataloader(root, transform, batch_size):
-    data = dataset(root, train=True, transform=transform)
+def get_dataloader(root, train, transform, batch_size):
+    data = dataset(root, train=train, transform=transform)
 
     # P4.4. Use `DataLoader` module for mini-batching train and test datasets.
     dataloader = DataLoader(data, batch_size=batch_size, shuffle=True, drop_last=True)
