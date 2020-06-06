@@ -3,6 +3,18 @@ import pytesseract
 from PIL import Image
 #import numpy as np
 import math
+from googletrans import Translator
+trans = Translator()
+
+def translate(text, dest='ko'):
+    result = trans.translate(text, dest=dest)
+    return result.text
+
+def check_text(text):
+    for char in text:
+        if char not in 'abcdefghijklmnopqrstuvwxyz1234567890,.?!()[]{}\'- ':
+            text = text.replace(char, '')
+    return text
 
 def read_image(image, lang='eng'):
     return pytesseract.image_to_string(image, lang=lang)
@@ -48,10 +60,7 @@ white_img = 255 - img
 gray = cv2.cvtColor(white_img, cv2.COLOR_RGB2GRAY)
 cv2.imwrite('gray.jpg', gray)
 
-#read text with pytesseract
-print(pytesseract.image_to_string(Image.open('gray.jpg'), lang='eng'))
-
-#find text boundaries and add on to the image
+#find text boundaries
 d = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
 n_boxes = len(d['level'])
 boxes = []
@@ -60,6 +69,7 @@ for i in range(n_boxes):
     if area(w, h) < 100 or area(w, h) > 1800: continue  
     boxes.append([x, y, x+w, y+h])
     
+#cluster the boxes to obtain sentence
 clusters = clustering(boxes)
 
 alpha=10
@@ -70,5 +80,8 @@ for cluster in clusters:
     croppedImageList.append(croppedImage)
 
 for image in croppedImageList:
-    print(read_image(image).replace('\n', ' ').lower())
+    text = read_image(image).replace('\n', ' ').lower()
+    if text == '': continue
+    print(check_text(text))
+    print(translate(check_text(text)))
     print('\n')
