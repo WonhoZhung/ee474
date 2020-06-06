@@ -81,6 +81,8 @@ for cluster in clusters:
     croppedImageList.append(croppedImage)
 
 for image in croppedImageList:
+    nx, ny = image.size
+    image = image.resize((int(nx*2), int(ny*2)), Image.BICUBIC)
     text = read_image(image).replace('\n', ' ').lower()
     if text == '': continue
     print(check_text(text))
