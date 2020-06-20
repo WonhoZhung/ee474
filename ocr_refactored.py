@@ -1,3 +1,4 @@
+import os
 import sys
 import cv2
 import pytesseract
@@ -7,22 +8,55 @@ import math
 from googletrans import Translator
 trans = Translator()
 import requests
+import getopt
 
 """
 COMMAND:
-python ocr_refactored.py {text_image_path} {masked_image_path}
+python ocr_refactored.py -i {text_image_path} -m {masked_image_path} -s {'ko' or 'en} -t {'ko' or 'en'}
 """
+
+options, args = getopt.getopt(sys.argv[1:], 'i:m:s:t:')
+for o, a in options:
+    if o == '-i':
+        input_image = a
+    elif o == '-m':
+        masked_image = a
+    elif o == '-s':
+        if a != 'en' and a != 'ko':
+            print('Only [en] or [ko] available!')
+            exit(-1)
+        else:
+            source = a
+            if a == 'en': lang = 'eng'
+            else: lang = 'kor'
+    elif o == '-t':
+        if a != 'en' and a != 'ko':
+            print('Only [en] or [ko] available!')
+        else:
+            target = a
+
 
 request_url = "https://openapi.naver.com/v1/papago/n2mt"
 
-def translate_papago(text, source='en', target='ko'):
+def translate(text, source, target):
+    if text == '': return
+    if source == 'en':
+        text = check_text(text.replace('\n', ' ').lower())
+    print(text)
+    try:
+        translated_text = translate_papago(text, source=source, target=target)
+    except:
+        translated_text = translate_google(text, dest=target)
+    return translated_text
+
+def translate_papago(text, source='en', target='ko', honorific='true'):
     headers = {"X-Naver-Client-Id": "pphSUkUVQ9iapBnJGHW5", "X-Naver-Client-Secret": "y5Xpn1KM48"}
-    params = {"source": source, "target": target, "text": text}
+    params = {"honorific": honorific, "source": source, "target": target, "text": text}
     response = requests.post(request_url, headers=headers, data=params)
     result = response.json()
     return result['message']['result']['translatedText']
 
-def translate(text, dest='ko'):
+def translate_google(text, dest='ko'):
     result = trans.translate(text, dest=dest)
     return result.text
 
@@ -47,7 +81,7 @@ def box_distance(box1, box2):
     retval += ((box1[1]+box1[3])/2 - (box2[1]+box2[3])/2)**2
     return math.sqrt(retval)
 
-def clustering(boxes, threshold=100):
+def clustering(boxes, threshold=50):
     clusters = []
     n = len(boxes)
     for i in range(n):
@@ -66,64 +100,67 @@ def clustering(boxes, threshold=100):
 def area(w, h):
     return w*h
 
+def main():
+    img = cv2.imread(input_image, cv2.IMREAD_COLOR)
 
-img = cv2.imread(sys.argv[1], cv2.IMREAD_COLOR)
-
-#invert the image
-white_img = 255 - img
-white_img[white_img < 100] = 0
-
-#change into grayscale
-gray = cv2.cvtColor(white_img, cv2.COLOR_RGB2GRAY)
-cv2.imwrite('gray.jpg', gray)
-
-#find text boundaries
-d = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
-n_boxes = len(d['level'])
-boxes = []
-for i in range(n_boxes):
-    (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-    if area(w, h) < 100 or area(w, h) > 1800: continue  
-    boxes.append([x, y, x+w, y+h])
+    #invert image
+    img_white = 255 - img
     
-#cluster the boxes to obtain sentence
-clusters = clustering(boxes)
+    #thresholding
+    img_white[img_white < 90] = 0
+    img_white[img_white > 150] = 255
+    cv2.imwrite('tmp_white.jpg', img_white)
 
-alpha=10
-croppedImageList = []
-text_locations = []
-image = Image.open("gray.jpg")
-for cluster in clusters:
-    croppedImage = image.crop((cluster[0]-alpha, cluster[1]-alpha, cluster[2]+alpha, cluster[3]+alpha))
-    croppedImageList.append(croppedImage)
-    text_locations.append(cluster)
+    gray = cv2.cvtColor(img_white, cv2.COLOR_RGB2GRAY)
+    cv2.imwrite('tmp_gray.jpg', gray)
 
-translated_texts = []
-for image in croppedImageList:
-    nx, ny = image.size
-    image = image.resize((int(nx*2), int(ny*2)), Image.BICUBIC)
-    text = read_image(image).replace('\n', ' ').lower()
-    if text == '': continue
-    print(check_text(text))
-    try:
-        translated_text = translate_papago(check_text(text))
-    except:
-        translated_text = translate(check_text(text))
-    translated_texts.append(translated_text)
-    print(translated_text)
-    print('\n')
+    d = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
+    n_boxes = len(d['level'])
+    boxes = []
+    for i in range(n_boxes):
+        (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+        if area(w, h) < 100 or area(w, h) > 1800: continue  
+        boxes.append([x, y, x+w, y+h])
+        cv2.rectangle(gray, (x,y), (x+w, y+h), (0, 255, 0), 2)
 
-masked_image = Image.open(sys.argv[2])
+    clusters = clustering(boxes)
+    cv2.imwrite('tmp_gray_box.jpg', gray)
+    alpha = 10
 
-fnt = "font/NanumPen.ttf"
-font = ImageFont.truetype(fnt, 12)
-draw = ImageDraw.Draw(masked_image)
+    croppedImageList = []
+    text_locations = []
+    image = Image.open("tmp_gray.jpg")
+    for i, cluster in enumerate(clusters):
+        croppedImage = image.crop((cluster[0]-alpha, cluster[1]-alpha, cluster[2]+alpha, cluster[3]+alpha))
+        #croppedImage.save(f"tmp_crop_{i}.jpg")
+        croppedImageList.append(croppedImage)
+        text_locations.append(cluster)
 
-for i, text in enumerate(translated_texts):
-    location = text_locations[i]
-    width = int((location[2] - location[0])/6)
-    for j in range(len(text)//width+1):
-        sub_text = text[width*j:width*(j+1)]
-        draw.text((location[0], location[1]+14*j),sub_text,(0, 0, 0),font=font)
+    translated_texts = []
+    for image in croppedImageList:
+        nx, ny = image.size
+        image = image.resize((int(nx*2), int(ny*2)), Image.BICUBIC)
+        text = read_image(image, lang=lang)
+        translated_text = translate(text, source, target)
+        translated_texts.append(translated_text)
+        print(translated_text)
+        print('\n')
 
-masked_image.save("result.jpg")
+    masked = Image.open(masked_image)
+
+    fnt = "font/NanumPen.ttf"
+    font = ImageFont.truetype(fnt, 14)
+    draw = ImageDraw.Draw(masked)
+
+    for i, text in enumerate(translated_texts):
+        location = text_locations[i]
+        width = int((location[2] - location[0])/6)
+        for j in range(len(text)//width+1):
+            sub_text = text[width*j:width*(j+1)]
+            draw.text((location[0], location[1]+15*j),sub_text,(0, 0, 0),font=font)
+
+    masked.save(f"translated.jpg")
+    os.system("rm tmp*jpg")
+
+if __name__ == '__main__':
+    main()
