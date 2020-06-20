@@ -13,6 +13,8 @@ import getopt
 """
 COMMAND:
 python ocr_refactored.py -i {text_image_path} -m {masked_image_path} -s {'ko' or 'en} -t {'ko' or 'en'}
+
+ex) python ocr_refactored.py -i text.png -m masked.png -s en -t ko
 """
 
 options, args = getopt.getopt(sys.argv[1:], 'i:m:s:t:')
