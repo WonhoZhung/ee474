@@ -85,7 +85,7 @@ def box_distance(box1, box2):
     retval += ((box1[1]+box1[3])/2 - (box2[1]+box2[3])/2)**2
     return math.sqrt(retval)
 
-def clustering(boxes, threshold=50):
+def clustering(boxes, threshold=100):
     clusters = []
     n = len(boxes)
     for i in range(n):
