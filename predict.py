@@ -46,5 +46,5 @@ def predict_image(dir):
     masked = masked.squeeze().cpu()
     image = tensor_to_image(predicted)
     image2 = tensor_to_image(masked)
-    image.save(os.path.join(save_path, 'text.png'))
-    image2.save(os.path.join(save_path, 'masked.png'))
+    image.save(os.path.join(save_path, 'tmp_text.png'))
+    image2.save(os.path.join(save_path, 'tmp_masked.png'))
