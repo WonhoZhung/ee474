@@ -3,6 +3,8 @@ import sys
 import cv2
 import pytesseract
 from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
 #import numpy as np
 import math
 from googletrans import Translator
