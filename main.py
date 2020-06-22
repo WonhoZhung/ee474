@@ -27,5 +27,5 @@ if __name__ == '__main__':
     predict.predict_image(dir)
     new_dir = Path(dir).parent
     os.system(f"python ocr_refactored.py -i {new_dir}/tmp_text.png -m {new_dir}/tmp_masked.png -s {source} -t {target}")
-    os.system("rm tmp*")
-    os.system("eog translate.jpg")
+    os.system("rm {new_dir}/tmp*")
+    os.system("eog translated.jpg")
