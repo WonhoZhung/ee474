@@ -119,9 +119,11 @@ def main():
     d = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
     n_boxes = len(d['level'])
     boxes = []
+    heights = []
     for i in range(n_boxes):
         (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-        if area(w, h) < 100 or area(w, h) > 1800: continue  
+        heights.append(h)
+        if area(w, h) < 100 or area(w, h) > 10000: continue  
         boxes.append([x, y, x+w, y+h])
         cv2.rectangle(gray, (x,y), (x+w, y+h), (0, 255, 0), 2)
 
@@ -140,8 +142,8 @@ def main():
 
     translated_texts = []
     for image in croppedImageList:
-        nx, ny = image.size
-        image = image.resize((int(nx*2), int(ny*2)), Image.BICUBIC)
+        #nx, ny = image.size
+        #image = image.resize((int(nx*2), int(ny*2)), Image.BICUBIC)
         text = read_image(image, lang=lang)
         translated_text = translate(text, source, target)
         translated_texts.append(translated_text)
@@ -151,7 +153,7 @@ def main():
     masked = Image.open(masked_image)
 
     fnt = "font/NanumPen.ttf"
-    font = ImageFont.truetype(fnt, 14)
+    font = ImageFont.truetype(fnt, sorted(heights)[1])
     draw = ImageDraw.Draw(masked)
 
     for i, text in enumerate(translated_texts):
@@ -159,7 +161,7 @@ def main():
         width = int((location[2] - location[0])/6)
         for j in range(len(text)//width+1):
             sub_text = text[width*j:width*(j+1)]
-            draw.text((location[0], location[1]+15*j),sub_text,(0, 0, 0),font=font)
+            draw.text((location[0], location[1]+sorted(heights)[1]*j),sub_text,(0, 0, 0),font=font)
 
     masked.save(f"translated.jpg")
     os.system("rm tmp*jpg")
