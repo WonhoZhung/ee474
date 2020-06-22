@@ -23,12 +23,10 @@ def predict_image(dir):
     image = torch.reshape(image, (1, c, w, h))
 
     model = SegNet(3)
-    if ngpu > 1:
-        model = nn.DataParallel(model)
     if use_gpu:
         model = model.to(device, non_blocking=True)
         image = image.to(device, non_blocking=True)
-    model.load_state_dict(torch.load('./models/autoencoder_{}.pth'.format(88)))
+    model.load_state_dict(torch.load('./models/autoencoder_{}.pth'.format(88), map_location=device))
 
     model.eval()
 
