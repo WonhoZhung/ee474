@@ -106,7 +106,8 @@ def area(w, h):
 
 def main():
     img = cv2.imread(input_image, cv2.IMREAD_COLOR)
-
+    r, c, _ = img.shape
+    
     #invert image
     img_white = 255 - img
     
@@ -153,7 +154,8 @@ def main():
     masked = Image.open(masked_image)
 
     fnt = "font/NanumPen.ttf"
-    font = ImageFont.truetype(fnt, 14)
+    size = int(14*r/172)
+    font = ImageFont.truetype(fnt, size)
     draw = ImageDraw.Draw(masked)
 
     for i, text in enumerate(translated_texts):
@@ -161,7 +163,7 @@ def main():
         width = int((location[2] - location[0])/6)
         for j in range(len(text)//width+1):
             sub_text = text[width*j:width*(j+1)]
-            draw.text((location[0], location[1]+15*j),sub_text,(0, 0, 0),font=font)
+            draw.text((location[0], location[1]+size*j),sub_text,(0, 0, 0),font=font)
 
     masked.save(f"translated.jpg")
     #os.system("rm tmp*jpg")
