@@ -166,7 +166,7 @@ def main():
             draw.text((location[0], location[1]+sorted(heights)[1]*j),sub_text,(0, 0, 0),font=font)
 
     masked.save(f"translated.jpg")
-    os.system("rm tmp*jpg")
+    #os.system("rm tmp*jpg")
 
 if __name__ == '__main__':
     main()
