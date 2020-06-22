@@ -150,9 +150,10 @@ def main():
     translated_texts = []
     for image in croppedImageList:
         text = read_image(Image.open(image), lang=lang)
-        if text == None: continue
         translated_text = translate(text, source, target)
-        if translated_text == None: continue
+        if translated_text == None: 
+            translated_texts.append("")
+            continue
         translated_texts.append(translated_text)
         print(translated_text)
         print('\n')
