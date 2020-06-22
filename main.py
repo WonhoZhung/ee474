@@ -3,6 +3,7 @@ import predict
 import getopt
 import os
 import sys
+from pathlib import Path
 
 if __name__ == '__main__':
     # train.train_autoencoder(epoch_plus=155)
@@ -24,6 +25,7 @@ if __name__ == '__main__':
     #dir = '/home/sgvr/wkim97/EE474/ee474/data/test_images/18.png'
     if dir == None: exit(-1)
     predict.predict_image(dir)
-    os.system(f"python ocr_refactored.py -i tmp_text.png -m tmp_masked.png -s {source} -t {target}")
+    new_dir = Path(dir).parent
+    os.system(f"python ocr_refactored.py -i {new_dir}/tmp_text.png -m {new_dir}/tmp_masked.png -s {source} -t {target}")
     os.system("rm tmp*")
     os.system("eog translate.jpg")
