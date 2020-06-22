@@ -1,5 +1,6 @@
 import os
 import sys
+import glob
 import cv2
 import pytesseract
 from PIL import Image
@@ -68,6 +69,8 @@ def check_text(text):
     for char in text:
         if char not in 'abcdefghijklmnopqrstuvwxyz1234567890,.?!()[]{}\'- ':
             text = text.replace(char, '')
+    text = text.replace('1', 'I')
+    text = text.replace('yoo', 'you')
     return text
 
 def read_image(image, lang='eng'):
@@ -107,7 +110,7 @@ def area(w, h):
 def main():
     img = cv2.imread(input_image, cv2.IMREAD_COLOR)
     r, c, _ = img.shape
-    
+
     #invert image
     img_white = 255 - img
     
@@ -118,35 +121,38 @@ def main():
 
     gray = cv2.cvtColor(img_white, cv2.COLOR_RGB2GRAY)
     cv2.imwrite('tmp_gray.jpg', gray)
-
-    d = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
+    
+    gray_pil = Image.open('tmp_gray.jpg')
+    draw = ImageDraw.Draw(gray_pil)
+    d = pytesseract.image_to_data(gray_pil, output_type=pytesseract.Output.DICT)
     n_boxes = len(d['level'])
     boxes = []
     for i in range(n_boxes):
         (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+        #print(area(w, h))
         if area(w, h) < 100 or area(w, h) > 10000: continue  
         boxes.append([x, y, x+w, y+h])
-        cv2.rectangle(gray, (x,y), (x+w, y+h), (0, 255, 0), 2)
+        draw.rectangle([(x,y), (x+w, y+h)])
 
     clusters = clustering(boxes)
-    cv2.imwrite('tmp_gray_box.jpg', gray)
+    print(len(clusters))
+    gray_pil.save('tmp_gray_box.jpg')
     alpha = 10
 
-    croppedImageList = []
     text_locations = []
     image = Image.open("tmp_gray.jpg")
     for i, cluster in enumerate(clusters):
         croppedImage = image.crop((cluster[0]-alpha, cluster[1]-alpha, cluster[2]+alpha, cluster[3]+alpha))
-        #croppedImage.save(f"tmp_crop_{i}.jpg")
-        croppedImageList.append(croppedImage)
+        croppedImage.save(f"tmp_crop_{i}.jpg")
         text_locations.append(cluster)
 
+    croppedImageList = glob.glob("tmp_crop_*.jpg")
     translated_texts = []
     for image in croppedImageList:
-        #nx, ny = image.size
-        #image = image.resize((int(nx*2), int(ny*2)), Image.BICUBIC)
-        text = read_image(image, lang=lang)
+        text = read_image(Image.open(image), lang=lang)
+        if text == None: continue
         translated_text = translate(text, source, target)
+        if translated_text == None: continue
         translated_texts.append(translated_text)
         print(translated_text)
         print('\n')
@@ -160,13 +166,13 @@ def main():
 
     for i, text in enumerate(translated_texts):
         location = text_locations[i]
-        width = int((location[2] - location[0])/6)
+        width = int((location[2] - location[0])/(0.4*size))
         for j in range(len(text)//width+1):
             sub_text = text[width*j:width*(j+1)]
             draw.text((location[0], location[1]+size*j),sub_text,(0, 0, 0),font=font)
 
     masked.save(f"translated.jpg")
-    #os.system("rm tmp*jpg")
+    os.system("rm tmp*jpg")
 
 if __name__ == '__main__':
     main()
