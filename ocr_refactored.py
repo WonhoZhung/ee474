@@ -129,13 +129,18 @@ def main():
     draw = ImageDraw.Draw(gray_pil)
     d = pytesseract.image_to_data(gray_pil, output_type=pytesseract.Output.DICT)
     n_boxes = len(d['level'])
+
+    confidences = d['conf']
+    print(confidences)
+
     boxes = []
     for i in range(n_boxes):
-        (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-        #print(area(w, h))
-        if area(w, h) < 100 or area(w, h) > 6000: continue  
-        boxes.append([x, y, x+w, y+h])
-        draw.rectangle([(x,y), (x+w, y+h)])
+        if int(confidences[i]) > 30:
+            (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+            #print(area(w, h))
+            if area(w, h) < 100 or area(w, h) > 6000: continue
+            boxes.append([x, y, x+w, y+h])
+            draw.rectangle([(x,y), (x+w, y+h)])
 
     clusters = clustering(boxes, threshold=r*60/170)
     gray_pil.save('tmp_gray_box.jpg')
