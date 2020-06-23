@@ -47,6 +47,8 @@ def translate(text, source, target):
     if text == '': return
     if source == 'en':
         text = check_text(text.replace('\n', ' ').lower())
+    elif source == 'ko':
+        text = text.replace('\n', ' ')
     print(text)
     try:
         translated_text = translate_papago(text, source=source, target=target)
@@ -88,7 +90,7 @@ def box_distance(box1, box2):
     retval += ((box1[1]+box1[3])/2 - (box2[1]+box2[3])/2)**2
     return math.sqrt(retval)
 
-def clustering(boxes, threshold=100):
+def clustering(boxes, threshold=180):
     clusters = []
     n = len(boxes)
     for i in range(n):
@@ -109,6 +111,7 @@ def area(w, h):
 
 def main():
     img = cv2.imread(input_image, cv2.IMREAD_COLOR)
+    print(img.shape)
     r, c, _ = img.shape
 
     #invert image
@@ -129,15 +132,16 @@ def main():
     boxes = []
     for i in range(n_boxes):
         (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-        #print(area(w, h))
-        if area(w, h) < 100 or area(w, h) > 10000: continue  
+        print(area(w, h))
+        if area(w, h) < 100 or area(w, h) > 6000: continue  
         boxes.append([x, y, x+w, y+h])
         draw.rectangle([(x,y), (x+w, y+h)])
 
-    clusters = clustering(boxes)
+    clusters = clustering(boxes, threshold=r*60/170)
     gray_pil.save('tmp_gray_box.jpg')
     alpha = 10
 
+    croppedImageList = []
     text_locations = []
     image = Image.open("tmp_gray.jpg")
     for i, cluster in enumerate(clusters):
@@ -145,13 +149,13 @@ def main():
         croppedImage.save(f"tmp_crop_{i}.jpg")
         text_locations.append(cluster)
 
-    croppedImageList = glob.glob("tmp_crop_*.jpg")
+    croppedImageList = sorted(glob.glob("tmp_crop_*.jpg"))
     translated_texts = []
     for image in croppedImageList:
         text = read_image(Image.open(image), lang=lang)
         translated_text = translate(text, source, target)
         if translated_text == None: 
-            translated_texts.append("")
+            translated_texts.append('')
             continue
         translated_texts.append(translated_text)
         print(translated_text)
@@ -160,13 +164,14 @@ def main():
     masked = Image.open(masked_image)
 
     fnt = "font/NanumPen.ttf"
-    size = int(14*r/172)
+    size = min(int(r/12), 24)
     font = ImageFont.truetype(fnt, size)
     draw = ImageDraw.Draw(masked)
 
     for i, text in enumerate(translated_texts):
         location = text_locations[i]
-        width = int((location[2] - location[0])/(0.4*size))
+        width = int((location[2] - location[0])/(0.5*size))
+        
         for j in range(len(text)//width+1):
             sub_text = text[width*j:width*(j+1)]
             draw.text((location[0], location[1]+size*j),sub_text,(0, 0, 0),font=font)
