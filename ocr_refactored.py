@@ -132,7 +132,7 @@ def main():
     boxes = []
     for i in range(n_boxes):
         (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-        print(area(w, h))
+        #print(area(w, h))
         if area(w, h) < 100 or area(w, h) > 6000: continue  
         boxes.append([x, y, x+w, y+h])
         draw.rectangle([(x,y), (x+w, y+h)])
