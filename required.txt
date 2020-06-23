@@ -6,3 +6,4 @@ opencv 4.2.0
 pillow 7.1.2 
 pytesseract 0.3.4
 googletrans 2.4.0
+PyQt5-5.13.2
