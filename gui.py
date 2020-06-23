@@ -13,8 +13,11 @@ class Ui_MainWindow(object):
     fromLang = "en"
     toLang = "en"
     original = "./output.png"
+    max_h = 600
+    max_w = 1100
+
     def setupUi(self, MainWindow):
-        MainWindow.setMinimumSize(1350, 850)
+        #MainWindow.setMinimumSize(1350, 850)
         MainWindow.showMaximized()
 
         font = QFont()
@@ -28,7 +31,7 @@ class Ui_MainWindow(object):
         self.verticalLayoutWidget = QWidget(self.centralwidget)
         self.verticalLayoutWidget.setFont(font)
         #self.verticalLayoutWidget.fitToWindowAct.setEnabled(True)
-        self.verticalLayoutWidget.setGeometry(QRect(20, 60, 831, 891))
+        self.verticalLayoutWidget.setGeometry(QRect(20, 60, 1100, 891))
         self.verticalLayoutWidget.setObjectName(("verticalLayoutWidget"))
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setObjectName(("verticalLayout"))
@@ -89,8 +92,8 @@ class Ui_MainWindow(object):
 
         spacerItem1 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.verticalLayout.addItem(spacerItem1)
-        self.verticalLayoutWidget_2 = QWidget(self.centralwidget)
-        self.verticalLayoutWidget_2.setGeometry(QRect(870, 60, 721, 901))
+        # self.verticalLayoutWidget_2 = QWidget(self.centralwidget)
+        # self.verticalLayoutWidget_2.setGeometry(QRect(1300, 60, 400, 901))
 
         self.label_8 = QLabel(self.centralwidget)
         self.label_8.setGeometry(QRect(60, 20, 651, 16))
@@ -107,7 +110,7 @@ class Ui_MainWindow(object):
         self.origin = QPoint()
 
         self.verticalLayoutWidget_2 = QWidget(self.centralwidget)
-        self.verticalLayoutWidget_2.setGeometry(QRect(880, 40, 591, 911))
+        self.verticalLayoutWidget_2.setGeometry(QRect(1200, 60, 591, 900))
         self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
 
         self.verticalLayout_2 = QVBoxLayout(self.verticalLayoutWidget_2)
@@ -162,11 +165,20 @@ class Ui_MainWindow(object):
             w = pm.width()
             h = pm.height()
 
-            if (h > w):
-                self.imageLabel.setPixmap(pm.scaledToHeight(650))
-
+            if (w <= self.max_w and h <= self.max_h):
+                self.imageLabel.setPixmap(pm)
             else:
-                self.imageLabel.setPixmap(pm.scaledToWidth(800))
+                msg = QMessageBox()
+                msg.setWindowTitle("Image Size Error")
+                msg.setText("Image size is too big!")
+                x = msg.exec_()  # this will show our messagebox
+
+
+            # if (h >= w):
+            #     self.imageLabel.setPixmap(pm.scaledToHeight(630))
+            #
+            # else:
+            #     self.imageLabel.setPixmap(pm.scaledToWidth(700))
 
             self.scaleFactor = 1.0
 
@@ -212,7 +224,7 @@ class Ui_MainWindow(object):
         else:
             self.label_6.setPixmap(pm.scaledToWidth(400))
 
-            
+
 
         self.scaleFactor = 1.0
 
