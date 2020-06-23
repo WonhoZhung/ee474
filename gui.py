@@ -228,7 +228,7 @@ class Ui_MainWindow(object):
 
         self.scaleFactor = 1.0
 
-        self.label_6.setAlignment(Qt.AlignCenter)
+        # self.label_6.setAlignment(Qt.AlignCenter)
         self.updateActions()
 
         if not self.fitToWindowAct.isChecked():
