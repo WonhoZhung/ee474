@@ -26,7 +26,7 @@ def predict_image(dir):
     if use_gpu:
         model = model.to(device, non_blocking=True)
         image = image.to(device, non_blocking=True)
-    model.load_state_dict(torch.load('./models/autoencoder_{}.pth'.format(88), map_location=device))
+    model.load_state_dict(torch.load('./models/model.pth', map_location=device))
 
     model.eval()
 
