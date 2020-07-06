@@ -151,7 +151,7 @@ def main():
             boxes.append([x, y, x+w, y+h])
             draw.rectangle([(x,y), (x+w, y+h)])
 
-    clusters = clustering(boxes, threshold=r*60/170)
+    clusters = clustering(boxes, threshold=r/5)
     #clusters = clustering(boxes)
     gray_pil.save('tmp_gray_box.jpg')
     alpha = 10
