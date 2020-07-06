@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtCore import Qt, QRect, QMetaObject, QSize, QPoint
-from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter, QFont
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
-    qApp, QFileDialog, QPushButton, QRubberBand, QComboBox, QHBoxLayout, QVBoxLayout, QSpacerItem, QWidget, QMenuBar, \
-    QStatusBar, QApplication, QLayout
 import os
+
+from PyQt5.QtCore import Qt, QRect, QMetaObject, QSize, QPoint
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QFont
+from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt5.QtWidgets import QLabel, QSizePolicy, QMessageBox, QMainWindow, QMenu, QAction, \
+    qApp, QFileDialog, QPushButton, QRubberBand, QComboBox, QVBoxLayout, QSpacerItem, QWidget, QApplication, QLayout
 
 targetFolder = "./"
 class Ui_MainWindow(object):
@@ -17,9 +17,9 @@ class Ui_MainWindow(object):
     max_w = 1100
 
     def setupUi(self, MainWindow):
-        #MainWindow.setMinimumSize(1350, 850)
         MainWindow.showMaximized()
-
+        
+        # Default font
         font = QFont()
         font.setFamily("Bahnschrift Light")
         font.setPointSize(10)
@@ -27,126 +27,114 @@ class Ui_MainWindow(object):
         font.setWeight(50)
 
         self.centralwidget = QWidget(MainWindow)
-        self.centralwidget.setObjectName(("centralwidget"))
         self.verticalLayoutWidget = QWidget(self.centralwidget)
         self.verticalLayoutWidget.setFont(font)
-        #self.verticalLayoutWidget.fitToWindowAct.setEnabled(True)
         self.verticalLayoutWidget.setGeometry(QRect(20, 60, 1100, 891))
-        self.verticalLayoutWidget.setObjectName(("verticalLayoutWidget"))
+        
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout.setObjectName(("verticalLayout"))
         self.verticalLayout.setSizeConstraint(QLayout.SetMaximumSize)
-        #self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setSpacing(8)
 
+        # for spacing UI
         spacerItem = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
-        self.label_7 = QLabel(self.verticalLayoutWidget)
-        self.verticalLayout.addWidget(self.label_7)
-
-
+        self.outputLabel = QLabel(self.verticalLayoutWidget)
+        self.verticalLayout.addWidget(self.outputLabel)
 
         self.printer = QPrinter()
         self.scaleFactor = 0.0
 
+        # To select area
         subclasses = self._subclass_container(self.verticalLayoutWidget)
         self.imageLabel = subclasses["rubberband"]
 
-
-        self.label = QLabel(self.verticalLayoutWidget)
-        self.label.setObjectName("label")
-        self.label.setText("From:")
-        self.label.setFont(font)
-        self.label.setMaximumSize(QSize(16777215, 30))
-        self.verticalLayout.addWidget(self.label)
+        # Select From Language
+        self.fromLabel = QLabel(self.verticalLayoutWidget)
+        self.fromLabel.setText("From:")
+        self.fromLabel.setFont(font)
+        self.fromLabel.setMaximumSize(QSize(16777215, 30))
+        self.verticalLayout.addWidget(self.fromLabel)
 
         self.comboBox = QComboBox(self.verticalLayoutWidget)
-        self.comboBox.setObjectName(("comboBox"))
         self.comboBox.addItem("English")
         self.comboBox.addItem("Korean")
         self.comboBox.setFont(font)
         self.comboBox.currentIndexChanged.connect(self.selectionchange)
         self.verticalLayout.addWidget(self.comboBox)
 
-        self.label_2 = QLabel(self.verticalLayoutWidget)
-        self.label_2.setObjectName(("label_2"))
-        self.label_2.setText("To:")
-        self.label_2.setFont(font)
-        self.label_2.setMaximumSize(QSize(16777215, 30))
-        self.verticalLayout.addWidget(self.label_2)
+        # Select To Language
+        self.toLabel = QLabel(self.verticalLayoutWidget)
+        self.toLabel.setText("To:")
+        self.toLabel.setFont(font)
+        self.toLabel.setMaximumSize(QSize(16777215, 30))
+        self.verticalLayout.addWidget(self.toLabel)
 
         self.comboBox_2 = QComboBox(self.verticalLayoutWidget)
-        self.comboBox_2.setObjectName(("comboBox_2"))
         self.comboBox_2.addItem("English")
         self.comboBox_2.addItem("Korean")
         self.comboBox_2.setFont(font)
         self.comboBox_2.currentIndexChanged.connect(self.selectionchange2)
         self.verticalLayout.addWidget(self.comboBox_2)
 
-        self.pushButton = QPushButton(self.verticalLayoutWidget)
-        self.pushButton.setObjectName(("pushButton"))
-        self.pushButton.setText("Translate")
-        self.pushButton.setFont(font)
-        self.pushButton.clicked.connect(self.changeImage)
-        self.verticalLayout.addWidget(self.pushButton)
+        # Translate Button
+        self.translateButton = QPushButton(self.verticalLayoutWidget)
+        self.translateButton.setText("Translate")
+        self.translateButton.setFont(font)
+        self.translateButton.clicked.connect(self.changeImage)
+        self.verticalLayout.addWidget(self.translateButton)
 
         spacerItem1 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.verticalLayout.addItem(spacerItem1)
-        # self.verticalLayoutWidget_2 = QWidget(self.centralwidget)
-        # self.verticalLayoutWidget_2.setGeometry(QRect(1300, 60, 400, 901))
 
-        self.label_8 = QLabel(self.centralwidget)
-        self.label_8.setGeometry(QRect(60, 20, 651, 16))
-        self.label_8.setFont(font)
-        self.label_8.setText("Drag to select the scene you want to translate")
+        # Instruction text label
+        self.instructutionLabel = QLabel(self.centralwidget)
+        self.instructutionLabel.setGeometry(QRect(60, 20, 651, 16))
+        self.instructutionLabel.setFont(font)
+        self.instructutionLabel.setText("*Warning: Please select individual scene only, not the speech bubble!*")
 
 
         MainWindow.setCentralWidget(self.centralwidget)
 
-
-
+        
         self.rubberBand = QRubberBand(QRubberBand.Rectangle, self.imageLabel)
         self.imageLabel.setMouseTracking(True)
         self.origin = QPoint()
 
         self.verticalLayoutWidget_2 = QWidget(self.centralwidget)
         self.verticalLayoutWidget_2.setGeometry(QRect(1200, 60, 591, 900))
-        self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
 
         self.verticalLayout_2 = QVBoxLayout(self.verticalLayoutWidget_2)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
 
+        # Original image text label
+        self.originalLabel = QLabel(self.verticalLayoutWidget_2)
+        self.originalLabel.setMaximumSize(QSize(16777215, 30))
+        self.originalLabel.setFont(font)
+        self.originalLabel.setText("Original:")
+        self.verticalLayout_2.addWidget(self.originalLabel)
 
-        self.label_3 = QLabel(self.verticalLayoutWidget_2)
-        self.label_3.setMaximumSize(QSize(16777215, 30))
-        self.label_3.setFont(font)
-        self.label_3.setObjectName("label_3")
-        self.label_3.setText("Original:")
-        self.verticalLayout_2.addWidget(self.label_3)
+        # Original image label
+        self.originalImageLabel = QLabel(self.verticalLayoutWidget_2)
+        self.originalImageLabel.setObjectName("originalImageLabel")
+        self.originalImageLabel.setMinimumSize(QSize(0, 300))
+        self.verticalLayout_2.addWidget(self.originalImageLabel)
 
-        self.label_5 = QLabel(self.verticalLayoutWidget_2)
-        self.label_5.setObjectName("label_5")
-        self.label_5.setMinimumSize(QSize(0, 300))
-        self.verticalLayout_2.addWidget(self.label_5)
+        # Translated image text label
+        self.translatedLabel = QLabel(self.verticalLayoutWidget_2)
+        self.translatedLabel.setMaximumSize(QSize(16777215, 30))
+        self.translatedLabel.setText("Translated:")
+        self.translatedLabel.setFont(font)
+        self.verticalLayout_2.addWidget(self.translatedLabel)
 
-        self.label_4 = QLabel(self.verticalLayoutWidget_2)
-        self.label_4.setMaximumSize(QSize(16777215, 30))
-        self.label_4.setObjectName("label_4")
-        self.label_4.setText("Translated:")
-        self.label_4.setFont(font)
-        self.verticalLayout_2.addWidget(self.label_4)
+        # Translated image label
+        self.translatedImageLabel = QLabel(self.verticalLayoutWidget_2)
+        self.translatedImageLabel.setMinimumSize(QSize(0, 300))
+        self.verticalLayout_2.addWidget(self.translatedImageLabel)
 
-        self.label_6 = QLabel(self.verticalLayoutWidget_2)
-        self.label_6.setObjectName("label_6")
-        self.label_5.setMinimumSize(QSize(0, 300))
-        self.verticalLayout_2.addWidget(self.label_6)
-
+        #Menu
         self.createActions()
         self.createMenus()
 
-
         MainWindow.setWindowTitle("Cartoon Translator")
-
         QMetaObject.connectSlotsByName(MainWindow)
 
 
@@ -174,12 +162,6 @@ class Ui_MainWindow(object):
                 x = msg.exec_()  # this will show our messagebox
 
 
-            # if (h >= w):
-            #     self.imageLabel.setPixmap(pm.scaledToHeight(630))
-            #
-            # else:
-            #     self.imageLabel.setPixmap(pm.scaledToWidth(700))
-
             self.scaleFactor = 1.0
 
             self.printAct.setEnabled(True)
@@ -189,14 +171,6 @@ class Ui_MainWindow(object):
 
             if not self.fitToWindowAct.isChecked():
                 self.imageLabel.adjustSize()
-
-    def translate(self):
-        btn = QPushButton("Translate", self)
-        btn.setFont(QFont('Helvetica', 10))
-        btn.resize(100, 50)
-        btn.move(350, 400)
-        btn.setContentsMargins(0, 0, 0, 0)
-        btn.clicked.connect(self.changeImage)
 
 
     def selectionchange(self):
@@ -208,9 +182,7 @@ class Ui_MainWindow(object):
             self.toLang = "ko"
 
     def changeImage(self):
-        print(self.fileName)
         os.system(f'python main.py -i output.png --lang {self.fromLang}')
-        #os.system(f'python read_png_refactored.py -i {self.fileName} -m mask.png -s {self.fromLang} -t {self.toLang}')
 
         image = QImage("./translated.jpg")
         pm = QPixmap.fromImage(image)
@@ -219,20 +191,21 @@ class Ui_MainWindow(object):
         h = pm.height()
 
         if (h > w):
-            self.label_6.setPixmap(pm.scaledToHeight(400))
+            self.translatedImageLabel.setPixmap(pm.scaledToHeight(400))
 
         else:
-            self.label_6.setPixmap(pm.scaledToWidth(400))
-
-
+            self.translatedImageLabel.setPixmap(pm.scaledToWidth(400))
 
         self.scaleFactor = 1.0
 
-        # self.label_6.setAlignment(Qt.AlignCenter)
+        self.translatedImageLabel.setAlignment(Qt.AlignCenter)
         self.updateActions()
 
+        os.remove('./translated.jpg')
+        os.remove('./output.png')
+
         if not self.fitToWindowAct.isChecked():
-            self.label_6.adjustSize()
+            self.translatedImageLabel.adjustSize()
 
     def print_(self):
         dialog = QPrintDialog(self.printer, self)
@@ -349,10 +322,6 @@ class Ui_MainWindow(object):
                         self.mode = "drag_lower_right"
                         self.selection.show()
 
-                    # self.originQPoint = eventQMouseEvent.pos()
-                    # self.currentQRubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle, self)
-                    # self.selection.setGeometry(QRect(self.originQPoint, QSize()))
-                    # self.selection.show()
 
             def mouseMoveEvent(self, event):
                 '''
@@ -368,31 +337,26 @@ class Ui_MainWindow(object):
                     self.selection.setGeometry(QRect(self.upper_left, self.lower_right).normalized())
 
             def mouseReleaseEvent(self, event):
-                # if event.button() == Qt.LeftButton:
-                #     self.rubberBand.hide()
+
                 if self.selection.isVisible():
                     currentQRect = self.selection.geometry()
-                    #self.selection.deleteLater()
                     cropQPixmap = self.pixmap().copy(currentQRect)
                     cropQPixmap.save('output.png')
 
                     image = QImage("output.png")
-                    #print("crop2")
                     if image.isNull():
                         QMessageBox.information(self.centralwidget, "Image Viewer", "Cannot load %s." % self.fileName)
                         return
 
-                    #print("crop3")
                     pm = QPixmap.fromImage(image)
-                    # pm = QPixmap.fromImage(image)
                     h = pm.height()
                     w = pm.width()
 
                     if (h > w):
-                        self._parent_class.label_5.setPixmap(pm.scaledToHeight(400))
+                        self._parent_class.originalImageLabel.setPixmap(pm.scaledToHeight(400))
 
                     else:
-                        self._parent_class.label_5.setPixmap(pm.scaledToWidth(400))
+                        self._parent_class.originalImageLabel.setPixmap(pm.scaledToWidth(400))
 
 
 
