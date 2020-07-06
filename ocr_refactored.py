@@ -85,21 +85,31 @@ def merge_box(box1, box2):
     y2 = max(box1[3], box2[3])
     return [x1, y1, x2, y2]
 
+def merge_boxes(boxes):
+    n = len(boxes)
+    mbox = boxes[0]
+    for i in range(n):
+        mbox = merge_box(mbox, boxes[i])
+    return mbox
+
 def point_distance(p1, p2):
     x1, y1 = p1
     x2, y2 = p2
     return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 
 def box_distance(box1, box2):
-    #retval = ((box1[0]+box1[2])/2 - (box2[0]+box2[2])/2)**2
-    #retval += ((box1[1]+box1[3])/2 - (box2[1]+box2[3])/2)**2
-    point_list1 = [(box1[0],box1[1]),(box1[0],box1[3]),(box1[2],box1[1]),(box1[0],box1[3])]
-    point_list2 = [(box2[0],box2[1]),(box2[0],box2[3]),(box2[2],box2[1]),(box2[0],box2[3])]
-    mindis = []
-    for p1 in point_list1:
-        for p2 in point_list2:
-            mindis.append(point_distance(p1,p2))
-    return min(mindis)
+    retval = point_distance(((box1[0]+box1[2])/2, (box1[1]+box1[3])/2), ((box2[0]+box2[2])/2, (box2[1]+box2[3])/2))
+    retval -= point_distance((box1[0], box1[1]), (box1[2], box1[3]))/2
+    retval -= point_distance((box2[0], box2[1]), (box2[2], box2[3]))/2
+
+    #point_list1 = [(box1[0],box1[1]),(box1[0],box1[3]),(box1[2],box1[1]),(box1[0],box1[3])]
+    #point_list2 = [(box2[0],box2[1]),(box2[0],box2[3]),(box2[2],box2[1]),(box2[0],box2[3])]
+    #mindis = []
+    #for p1 in point_list1:
+    #    for p2 in point_list2:
+    #        mindis.append(point_distance(p1,p2))
+    
+    return retval
 
 def clustering(boxes, threshold=50):
     clusters = []
@@ -118,6 +128,25 @@ def clustering(boxes, threshold=50):
         else: clusters.append(boxes[i])
     return clusters
 
+def clustering_new(boxes, threshold=50):
+    boxes = [tuple(b) for b in boxes]
+    clusters = []
+    n = len(boxes)
+    for i in range(n):
+        cluster = {boxes[i]}
+        for x, c in enumerate(clusters):
+            if boxes[i] in c: 
+                cluster = c
+                idx = x
+        if cluster in clusters:
+            del clusters[idx]
+        for j in range(i+1, n):
+            if box_distance(boxes[i], boxes[j]) < threshold: cluster.add(boxes[j])
+        clusters.append(cluster)
+    
+    retval = [merge_boxes(list(c)) for c in clusters]
+    return retval    
+
 def area(w, h):
     return w*h
 
@@ -125,7 +154,7 @@ def main():
     img = cv2.imread(input_image, cv2.IMREAD_COLOR)
     #print(img.shape)
     r, c, _ = img.shape
-
+    
     #invert image
     img_white = 255 - img
     
@@ -151,8 +180,7 @@ def main():
             boxes.append([x, y, x+w, y+h])
             draw.rectangle([(x,y), (x+w, y+h)])
 
-    clusters = clustering(boxes, threshold=r/5)
-    #clusters = clustering(boxes)
+    clusters = clustering_new(boxes, threshold=10)
     gray_pil.save('tmp_gray_box.jpg')
     alpha = 10
 
@@ -185,14 +213,14 @@ def main():
 
     for i, text in enumerate(translated_texts):
         location = text_locations[i]
-        width = int((location[2] - location[0])/(0.5*size))
+        width = int((location[2] - location[0])/(0.4*size))
         
         for j in range(len(text)//width+1):
             sub_text = text[width*j:width*(j+1)]
             draw.text((location[0], location[1]+size*j),sub_text,(0, 0, 0),font=font)
 
     masked.save(f"translated.jpg")
-    #os.system("rm tmp*jpg")
+    os.system("rm tmp*jpg")
 
 if __name__ == '__main__':
     main()
