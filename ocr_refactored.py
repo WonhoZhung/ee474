@@ -213,7 +213,7 @@ def main():
 
     for i, text in enumerate(translated_texts):
         location = text_locations[i]
-        width = int((location[2] - location[0])/(0.4*size))
+        width = int((location[2] - location[0])/(0.45*size))
         
         for j in range(len(text)//width+1):
             sub_text = text[width*j:width*(j+1)]
