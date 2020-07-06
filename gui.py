@@ -268,7 +268,6 @@ class Ui_MainWindow(object):
         self.helpMenu.addAction(self.aboutQtAct)
 
         MainWindow.menuBar().addMenu(self.fileMenu)
-        # MainWindow.menuBar().addMenu(self.viewMenu)
         MainWindow.menuBar().addMenu(self.helpMenu)
 
     def updateActions(self):
