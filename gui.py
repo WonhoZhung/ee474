@@ -198,7 +198,6 @@ class Ui_MainWindow(object):
 
         self.scaleFactor = 1.0
 
-        self.translatedImageLabel.setAlignment(Qt.AlignCenter)
         self.updateActions()
 
         os.remove('./translated.jpg')
