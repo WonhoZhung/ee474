@@ -6,7 +6,7 @@ Presentation slides can be found in this [link to slides](https://docs.google.co
 ### Dataset and pretrained weights
 Training dataset used to train our model can be found in the [link to dataset](https://drive.google.com/file/d/1lHqWl2tyaK7m4G6eWnxtEyUYpn6yPXGa/view?usp=sharing), \
 and the pretrained weight can be found in the [link to pretrained model](https://drive.google.com/file/d/1Ca48wsEB4P7QKYaaYZhekwAljooqAgbN/view?usp=sharing), \
-and the test images used to test our model can be found in the [link to test images]().
+and the test images used to test our model can be found in the [link to test images](https://drive.google.com/file/d/1FE-iUyII7mbo6rrHXbCq-CYnf8-GKKbz/view?usp=sharing).
 
 ### Configurations
 To download necessary packages to run our project, use the following command:
