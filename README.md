@@ -34,7 +34,7 @@ Here are some visualizations of the results. First row shows original cartoons w
 
 
 
-### Wooooz ↓
+### Credits ↓
 
 
                              ..:::::::::::::::....
