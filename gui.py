@@ -200,8 +200,10 @@ class Ui_MainWindow(object):
 
         self.updateActions()
 
-        os.remove('./translated.jpg')
-        os.remove('./output.png')
+        if os.path.exists('./translated.jpg'):
+            os.remove('./translated.jpg')
+        if os.path.exists('./output.png'):
+            os.remove('./output.png')
 
         if not self.fitToWindowAct.isChecked():
             self.translatedImageLabel.adjustSize()
