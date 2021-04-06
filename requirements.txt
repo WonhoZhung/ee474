@@ -2,7 +2,7 @@ torch==1.4.0
 tensorboard==2.2.1
 numpy==1.18.1
 opencv-python==4.2.0.32
-pillow==7.1.2 
+Pillow>=8.1.1
 pytesseract==0.3.4
 googletrans==2.4.0
 PyQt5==5.13.2
