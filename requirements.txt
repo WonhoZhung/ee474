@@ -6,4 +6,4 @@ Pillow>=8.1.1
 pytesseract==0.3.4
 googletrans==2.4.0
 PyQt5==5.13.2
-tqdm==4.42.1
+tqdm==4.66.3
